@@ -1,0 +1,10 @@
+# Copie para backend.hcl (ignorado pelo Git) e use:
+#   terraform init -backend-config=backend.hcl
+bucket           = "tfstate-globalacademy-ian"
+namespace        = "namespace-da-tenancy"
+region           = "sa-saopaulo-1"
+auth             = "APIKey"
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxx"
+user_ocid        = "ocid1.user.oc1..xxxx"
+fingerprint      = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+private_key_path = "~/.oci/oci_api_key.pem"

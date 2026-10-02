@@ -1,0 +1,7 @@
+# Copie para terraform.tfvars (ignorado pelo Git) e preencha.
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxx"
+user_ocid        = "ocid1.user.oc1..xxxx"
+fingerprint      = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+private_key_path = "~/.oci/oci_api_key.pem"
+region           = "sa-saopaulo-1"
+compartment_id   = "ocid1.compartment.oc1..xxxx" # compartment GlobalAcademy-Ian

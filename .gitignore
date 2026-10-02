@@ -1,0 +1,20 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# Variáveis e segredos (versionar apenas os .example)
+*.tfvars
+!*.tfvars.example
+*.pem
+*.pub
+backend.hcl
+backend.hcl
+
+# Ignorar qualquer pasta "keys" no projeto e seu conteúdo
+keys/
+**/keys/
+
+# .terraform.lock.hcl DEVE ser versionado (garante as mesmas versões de provider no CI).
