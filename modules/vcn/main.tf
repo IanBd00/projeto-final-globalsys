@@ -90,7 +90,7 @@ resource "oci_core_subnet" "this" {
 
   compartment_id             = var.compartment_id
   vcn_id                     = oci_core_vcn.this.id
-  display_name               = coalesce(each.value.display_name, "${var.name}-${each.key}-subnet")
+  display_name               = coalesce(each.value.display_name, "${each.key}-SUBNET")
   cidr_block                 = each.value.cidr_block
   dns_label                  = each.value.dns_label
   prohibit_public_ip_on_vnic = each.value.type == "private"

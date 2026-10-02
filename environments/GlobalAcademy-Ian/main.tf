@@ -5,20 +5,19 @@ module "vcn" {
   name           = local.names.vcn
   cidr_block     = var.vcn_cidr
   dns_label      = var.vcn_dns_label
-  freeform_tags  = local.tags
 
   subnets = {
-    dmz = {
+    DMZ = {
       cidr_block = var.dmz_subnet_cidr
       type       = "public"
       dns_label  = "dmz"
     }
-    mgmt = {
-      cidr_block = var.mgmt_subnet_cidr
+    JUMP = {
+      cidr_block = var.jump_subnet_cidr
       type       = "public"
-      dns_label  = "mgmt"
+      dns_label  = "jump"
     }
-    private = {
+    PRIVATE = {
       cidr_block = var.private_subnet_cidr
       type       = "private"
       dns_label  = "private"
@@ -32,7 +31,6 @@ module "nsg" {
   compartment_id = var.compartment_id
   vcn_id         = module.vcn.id
   nsgs           = local.nsgs
-  freeform_tags  = local.tags
 }
 
 module "compute" {

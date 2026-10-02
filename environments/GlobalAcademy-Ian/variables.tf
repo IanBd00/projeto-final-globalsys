@@ -32,25 +32,7 @@ variable "compartment_id" {
   description = "OCID do compartment GlobalAcademy-Ian (já existente), onde todos os recursos serão criados."
 }
 
-# --- Identificação e tags -----------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Nome curto do projeto, usado em nomes e tags."
-  default     = "FP-IAN"
-}
-
-variable "environment" {
-  type        = string
-  description = "Ambiente (ex.: prd, hml, dev)."
-  default     = "prd"
-}
-
-variable "owner" {
-  type        = string
-  description = "Responsável pelo ambiente (tag owner)."
-  default     = "cloudops-globalsys"
-}
 
 # --- Rede ---------------------------------------------------------------------
 
@@ -78,7 +60,7 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-variable "mgmt_subnet_cidr" {
+variable "jump_subnet_cidr" {
   type        = string
   description = "CIDR da subnet pública de gestão, onde fica o jump server."
   default     = "10.0.3.0/24"

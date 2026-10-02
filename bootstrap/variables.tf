@@ -31,7 +31,7 @@ variable "compartment_id" {
 variable "bucket_name" {
   type        = string
   description = "Nome do bucket de state."
-  default     = "tfstate-fp-ianbello"
+  default     = "TFSTATE-GLOBALACADEMY-IAN"
 }
 
 variable "freeform_tags" {

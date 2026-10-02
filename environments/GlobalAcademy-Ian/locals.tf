@@ -3,15 +3,7 @@ locals {
 
   # Convenção de nomes (mantida igual ao diagrama de arquitetura).
   names = {
-    vcn = "VCN-${var.project}"
-  }
-
-  # Tags aplicadas aos recursos de rede (as VMs não recebem tags livres).
-  tags = {
-    project     = var.project
-    environment = var.environment
-    owner       = var.owner
-    managed_by  = "terraform"
+    vcn = "VCN-ACADEMY-IAN"
   }
 
   # Regras que dependem da lista de IPs da Globalsys (admin_cidrs): uma regra por CIDR.
@@ -81,8 +73,8 @@ locals {
   # --- Instâncias: adicionar uma VM = adicionar uma entrada aqui --------------
   instances = {
     npm = {
-      name           = "SRV-NPM-PRD01"
-      subnet         = "dmz"
+      name           = "SRV-IAN-NPM-PRD01"
+      subnet         = "DMZ"
       nsg            = "npm"
       public_ip_mode = "ephemeral"
       fault_domain   = "FAULT-DOMAIN-1"
@@ -90,8 +82,8 @@ locals {
       memory_in_gbs  = 4
     }
     jump = {
-      name           = "SRV-JUMP-PRD01"
-      subnet         = "mgmt"
+      name           = "SRV-IAN-JUMP-PRD01"
+      subnet         = "JUMP"
       nsg            = "jump"
       public_ip_mode = "ephemeral"
       fault_domain   = "FAULT-DOMAIN-3"
@@ -99,8 +91,8 @@ locals {
       memory_in_gbs  = 4
     }
     mon = {
-      name           = "SRV-MONITORAMENTO-PRD01"
-      subnet         = "private"
+      name           = "SRV-IAN-MONITORAMENTO-PRD01"
+      subnet         = "PRIVATE"
       nsg            = "mon"
       public_ip_mode = "none"
       fault_domain   = "FAULT-DOMAIN-2"
@@ -108,8 +100,8 @@ locals {
       memory_in_gbs  = 6
     }
     app01 = {
-      name           = "SRV-IANWEB-APP01"
-      subnet         = "private"
+      name           = "SRV-IAN-WEB-APP01"
+      subnet         = "PRIVATE"
       nsg            = "web"
       public_ip_mode = "none"
       fault_domain   = "FAULT-DOMAIN-1"
@@ -117,8 +109,8 @@ locals {
       memory_in_gbs  = 2
     }
     app02 = {
-      name           = "SRV-IANWEB-APP02"
-      subnet         = "private"
+      name           = "SRV-IAN-WEB-APP02"
+      subnet         = "PRIVATE"
       nsg            = "web"
       public_ip_mode = "none"
       fault_domain   = "FAULT-DOMAIN-2"
