@@ -38,9 +38,9 @@ As VMs são criadas sem tags livres (somente as tags padrão da Oracle). Cada m�
 | Componente | Subnet | IP público | Recursos | NSG |
 |---|---|---|---|---|
 | SRV-NPM-PRD01 | DMZ 10.0.1.0/24 (pública) | Efêmero | 1 OCPU, 4 GB | NSG-NPM |
-| SRV-JUMP-PRD01 | Gestão 10.0.3.0/24 (pública) | Efêmero | 1 OCPU, 4 GB | NSG-JUMP |
+| SRV-JUMP-PRD01 | JUMP 10.0.3.0/24 (pública) | Efêmero | 1 OCPU, 4 GB | NSG-JUMP |
 | SRV-MONITORAMENTO-PRD01 | Privada 10.0.2.0/24 | Não | 1 OCPU, 6 GB | NSG-MONITORAMENTO |
-| SRV-IANWEB-APP01 e APP02 | Privada | Não | 1 OCPU, 2 GB cada | NSG-WEB |
+| SRV-IANWEB-APP01 e APP02 | Privada 10.0.2.0/24 | Não | 1 OCPU, 2 GB cada | NSG-WEB |
 
 Regras principais:
 
@@ -49,7 +49,7 @@ Regras principais:
 | NSG-NPM | 80 e 443 de qualquer origem; 81 (UI do NPM) e 3000 (Grafana, via NPM) **somente do IP da Globalsys**; 22 do jump; 9100 do monitoramento |
 | NSG-JUMP | 22 somente do IP da Globalsys; 9100 do monitoramento |
 | NSG-WEB | 80 do NPM e do monitoramento (probe); 22 do jump; 9100 do monitoramento |
-| NSG-MONITORAMENTO | 3000 do NPM e do jump; 22 do jump |
+| NSG-MONITORAMENTO | 3000 do NPM; 22 do jump |
 
 Monitoramento: o Prometheus coleta métricas do `node_exporter` (porta 9100) nas 5 VMs e o `blackbox_exporter` testa a disponibilidade HTTP das apps e da URL pública. O Grafana exibe os dashboards.
 
@@ -110,7 +110,7 @@ Push na `main` e pull requests rodam só as etapas 1 e 2. O apply usa o plan ger
 | Secret | `OCI_PRIVATE_KEY` | Conteúdo do `.pem` da chave de API |
 | Variable | `OCI_REGION`, `OCI_NAMESPACE`, `TF_STATE_BUCKET` | Região, namespace e bucket do state |
 | Variable | `OCI_COMPARTMENT_ID` | OCID do compartment GlobalAcademy-Ian |
-| Variable | `OCI_IMAGE_ID`, `SSH_PUBLIC_KEY` | Imagem e chave pública das VMs |
+| Variable | `OCI_IMAGE_ID` | Imagem das VMs |
 | Variable | `ADMIN_CIDRS` | Lista JSON, ex.: `["203.0.113.10/32"]` |
 
 Permissões OCI (ponto de partida, ajustar com o administrador): gerenciar `virtual-network-family` e `instance-family` no compartment, e `manage objects` no bucket de state.
@@ -130,16 +130,6 @@ O NPM balanceia o tráfego 80/443 entre SRV-IANWEB-APP01 e APP02.
 ## Acesso administrativo (jump server)
 
 O único ponto de entrada SSH é o **SRV-JUMP-PRD01**, com IP público e porta 22 liberada somente para os IPs da Globalsys (`admin_cidrs`). As demais VMs só aceitam SSH vindo do jump. O IP do jump aparece no output `jump_public_ip`. O usuário padrão da imagem Oracle Linux é `opc`.
-
-```bash
-# SSH em qualquer VM passando pelo jump
-ssh -J opc@<jump_public_ip> opc@srv-ianweb-app01.private.fpianbello.oraclevcn.com
-
-# Grafana por túnel (alternativa à porta 3000 do NPM)
-ssh -N -L 3000:srv-monitoramento-prd01.private.fpianbello.oraclevcn.com:3000 opc@<jump_public_ip>
-```
-
-Os nomes `*.oraclevcn.com` são resolvidos pelo DNS da VCN, a partir do jump.
 
 > Desenho de laboratório: o jump tem IP público para facilitar o acesso. Em produção, o ideal é que ele fique em subnet privada e seja alcançado por VPN IPSec (DRG e CPE).
 
