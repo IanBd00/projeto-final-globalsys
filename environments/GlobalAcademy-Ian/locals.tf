@@ -51,9 +51,9 @@ locals {
     mon = {
       display_name = "NSG-MONITORAMENTO"
       rules = {
-        grafana_from_npm  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.1.247/32", port_min = 3000, description = "Grafana publicado pelo NPM" }
-        ssh_from_jump     = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.3.177/32", port_min = 22, description = "SSH somente do jump" }
-        egress_all        = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada (via NAT)" }
+        grafana_from_npm = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.1.247/32", port_min = 3000, description = "Grafana publicado pelo NPM" }
+        ssh_from_jump    = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.3.177/32", port_min = 22, description = "SSH somente do jump" }
+        egress_all       = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada (via NAT)" }
       }
     }
 
@@ -62,9 +62,9 @@ locals {
       rules = merge(
         {
           jump_http_access  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "177.145.42.18/32", port_min = 80, description = "Permissão HTTP" }
-          jump_https_access  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "177.145.42.18/32", port_min = 443, description = "Permissão HTTPS" }
-          metrics_from_mon = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.2.101/32", port_min = 9100, description = "Prometheus coleta o node_exporter" }
-          egress_all       = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada" }
+          jump_https_access = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "177.145.42.18/32", port_min = 443, description = "Permissão HTTPS" }
+          metrics_from_mon  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.2.101/32", port_min = 9100, description = "Prometheus coleta o node_exporter" }
+          egress_all        = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada" }
         },
         { for k, r in local.admin_rules[22] : "ssh_admin_${k}" => merge(r, { description = "SSH somente do IP da Globalsys" }) },
       )
