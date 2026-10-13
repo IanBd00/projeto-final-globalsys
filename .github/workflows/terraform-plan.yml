@@ -1,0 +1,131 @@
+
+name: Terraform Plan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Impede que o planejamento e a aplicação na main
+# sejam executados simultaneamente.
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.14.x"
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  validate:
+    name: Format and Validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: environments/GlobalAcademy-Ian
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Format Check
+        run: terraform fmt -check -diff -recursive .
+
+      - name: Init for Validation
+        run: terraform init -backend=false -input=false
+
+      - name: Validate
+        run: terraform validate -no-color
+
+  plan:
+    name: Generate OCI Plan
+    needs: validate
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
+      TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+      TF_VAR_private_key_path: /tmp/oci_api_key.pem
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      TF_VAR_compartment_id: ${{ vars.OCI_COMPARTMENT_ID }}
+      TF_VAR_image_id: ${{ vars.OCI_IMAGE_ID }}
+      TF_VAR_admin_cidrs: ${{ vars.ADMIN_CIDRS }}
+
+      STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      STATE_NAMESPACE: ${{ vars.OCI_NAMESPACE }}
+
+    defaults:
+      run:
+        working-directory: environments/GlobalAcademy-Ian
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Write OCI API Key
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$OCI_PRIVATE_KEY"
+          umask 077
+          printf '%s\n' "$OCI_PRIVATE_KEY" > "$TF_VAR_private_key_path"
+
+      - name: Init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=$STATE_BUCKET" \
+            -backend-config="namespace=$STATE_NAMESPACE" \
+            -backend-config="region=$TF_VAR_region" \
+            -backend-config="auth=APIKey" \
+            -backend-config="tenancy_ocid=$TF_VAR_tenancy_ocid" \
+            -backend-config="user_ocid=$TF_VAR_user_ocid" \
+            -backend-config="fingerprint=$TF_VAR_fingerprint" \
+            -backend-config="private_key_path=$TF_VAR_private_key_path"
+
+      - name: Generate Plan
+        run: |
+          set -euo pipefail
+
+          terraform plan -input=false -no-color -out=tfplan
+          terraform show -no-color tfplan > tfplan.txt
+          terraform version -json | jq -r '.terraform_version' > terraform-version.txt
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: terraform-plan
+          path: |
+            environments/GlobalAcademy-Ian/tfplan
+            environments/GlobalAcademy-Ian/tfplan.txt
+            environments/GlobalAcademy-Ian/terraform-version.txt
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+      - name: Remove OCI API Key
+        if: always()
+        run: rm -f /tmp/oci_api_key.pem
