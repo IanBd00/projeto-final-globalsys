@@ -61,9 +61,9 @@ locals {
       display_name = "NSG-JUMP"
       rules = merge(
         {
-          jump_http_access  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "177.145.42.18/32", port_min = 80, description = "Permissão HTTP" }
-          metrics_from_mon  = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.2.101/32", port_min = 9100, description = "Prometheus coleta o node_exporter" }
-          egress_all        = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada" }
+          jump_http_access = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "177.145.42.18/32", port_min = 80, description = "Permissão HTTP" }
+          metrics_from_mon = { direction = "INGRESS", protocol = "tcp", peer_type = "CIDR", peer = "10.0.2.101/32", port_min = 9100, description = "Prometheus coleta o node_exporter" }
+          egress_all       = { direction = "EGRESS", protocol = "all", peer_type = "CIDR", peer = "0.0.0.0/0", description = "Saída liberada" }
         },
         { for k, r in local.admin_rules[22] : "ssh_admin_${k}" => merge(r, { description = "SSH somente do IP da Globalsys" }) },
       )

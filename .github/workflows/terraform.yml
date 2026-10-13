@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  TF_VERSION: "1.14.x"
+  TF_VERSION: "1.16.x"
   TF_IN_AUTOMATION: "true"
   TF_INPUT: "false"
   # Variáveis do Terraform vindas dos secrets/variables do repositório
@@ -67,8 +67,10 @@ jobs:
 
       - name: 1. Validate
         run: |
-          terraform fmt -check -recursive ../..
-          terraform validate
+          pwd
+          terraform version
+          find ../.. -type f -name "*.tf" -print
+          terraform fmt -check -diff -recursive ../..
 
       - name: 2. Plan
         run: terraform plan -out=tfplan
